@@ -359,8 +359,13 @@ jobs:
           name: Backend smoke test.
           command: |
             API_URL=`tail -1 .circleci/ansible/inventory.txt`
-            echo $API_URL
-            curl -s $API_URL/api/status
+            export URL=http://${API_URL}:3030
+            if curl -s $URL/api/status | grep "ok"
+            then
+              exit 0
+            else
+              exit 1
+            fi            
       - run:
           name: Frontend smoke test.
           command: |
