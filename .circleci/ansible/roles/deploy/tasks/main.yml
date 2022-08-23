@@ -2,8 +2,8 @@
 - name: Copy files from backend
   become: true
   copy:
-    src: /home/backend.tar.gz
-    dest: /home/ubuntu/backend.tar.gz
+    src: /home/artifact.tar.gz
+    dest: /home/ubuntu/artifact.tar.gz
 
 - name: Start PM2
   shell: |
