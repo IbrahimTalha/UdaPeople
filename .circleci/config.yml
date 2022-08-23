@@ -315,8 +315,8 @@ jobs:
 #             then
 #               # your code here
 #             fi
-            
-
+ #           
+#
 workflows:
   default:
     jobs:
@@ -337,6 +337,8 @@ workflows:
               only: [master]
       - configure-infrastructure:
           requires: [deploy-infrastructure]
+      - run-migrations:
+          requires: [configure-infrastructure]
       # - deploy-frontend:
       #     requires: [run-migrations]
       # - deploy-backend:
