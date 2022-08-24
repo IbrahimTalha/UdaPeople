@@ -1,5 +1,4 @@
 version: 2.1
-
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -64,8 +63,7 @@ commands:
               cd ~/project/backend
               npm install
               npm run migration:revert
-            fi
-            
+            fi            
 jobs:
   build-frontend:
     docker:
@@ -83,7 +81,6 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-
   build-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -100,7 +97,6 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
-
   test-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -113,8 +109,7 @@ jobs:
           command: |
             cd frontend
             npm install
-            npm run test
-                
+            npm run test                
   test-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -127,8 +122,7 @@ jobs:
           command: |
             cd backend
             npm install
-            npm test
-            
+            npm test  
   scan-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -143,7 +137,6 @@ jobs:
             npm install
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
-
   scan-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -159,7 +152,6 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
-
   deploy-infrastructure:
     docker:
       - image: cimg/base:stable
@@ -185,8 +177,7 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeople \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-              
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"         
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -201,8 +192,6 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
-      
-
   configure-infrastructure:
     docker:
       - image: cimg/base:stable
@@ -247,7 +236,6 @@ jobs:
             fi
       - destroy-environment
       - revert-migrations
-
   deploy-frontend:
     docker:
       - image: cimg/base:stable
@@ -271,7 +259,6 @@ jobs:
               --output text)
             echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
             cat frontend/.env
-
       - run:
           name: Deploy frontend objects
           command: |
@@ -280,7 +267,6 @@ jobs:
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment
       - revert-migrations                    
-
   deploy-backend:
     docker:
       - image: cimg/base:stable
@@ -291,6 +277,10 @@ jobs:
       - install_nodejs
       - add_ssh_keys:
           fingerprints: ["9d:6b:2f:82:f6:42:96:fc:7f:5f:d4:b6:be:09:41:30"]
+      - attach_workspace:
+          at: ~/
+      - restore_cache:
+          keys: [backend-deps]
       - run:
           name: Install dependencies
           command: |
@@ -368,7 +358,6 @@ jobs:
               --stack-name InitialStack
       - destroy-environment
       - revert-migrations 
-
   cleanup:
     docker:
       - image: cimg/base:stable

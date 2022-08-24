@@ -1,6 +1,5 @@
 Description: >
   UdaPeople backend stack.
-
 Parameters:
   ID:
     Description: Unique identifier.
@@ -32,13 +31,14 @@ Resources:
       InstanceType: t2.micro
       SecurityGroups:
         - Ref: InstanceSecurityGroup
-      KeyName: udacity 
-      ImageId: ami-08d4ac5b634553e16
+      KeyName: udacity
+      ImageId: ami-0d70546e43a941d70
       Tags:
         - Key: Name
           Value: !Sub backend-${ID}
         - Key: Project
           Value: Udapeople
+
   InstanceEIP:
     Type: AWS::EC2::EIP
     Properties:
