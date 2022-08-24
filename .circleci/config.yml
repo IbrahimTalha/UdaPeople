@@ -1,5 +1,4 @@
 version: 2.1
-
 commands:
   destroy-environment:
     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
@@ -16,10 +15,10 @@ commands:
             aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
   install_awscli:
-    description: Install AWS CLI v2
+    description: Install AWS CLI
     steps:
       - run:
-          name: Install AWS CLI v2
+          name: Install AWS CLI
           command: |
             curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
             unzip awscliv2.zip
@@ -30,13 +29,12 @@ commands:
       - run:
           name: Install Node.js 13
           command: |
-            # Install Node.js LTS version as our base Node.js version
+            # Install Node.js
             curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
             sudo apt install -y nodejs
-            # Use n version manager to use Node.js v13.8.0
+            # Use Node.js
             sudo npm install --global n
             sudo n 13.8.0
-
   install_ansible:
     description: Install Ansible
     steps:
@@ -65,7 +63,6 @@ commands:
               npm install
               npm run migration:revert
             fi
-            
 jobs:
   build-frontend:
     docker:
@@ -83,7 +80,6 @@ jobs:
       - save_cache:
           paths: [frontend/node_modules]
           key: frontend-build
-
   build-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -100,7 +96,6 @@ jobs:
       - save_cache:
           paths: [backend/node_modules]
           key: backend-build
-
   test-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -114,7 +109,6 @@ jobs:
             cd frontend
             npm install
             npm run test
-                
   test-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -128,7 +122,6 @@ jobs:
             cd backend
             npm install
             npm test
-            
   scan-frontend:
     docker:
       - image: circleci/node:13.8.0
@@ -143,7 +136,6 @@ jobs:
             npm install
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
-
   scan-backend:
     docker:
       - image: circleci/node:13.8.0
@@ -159,7 +151,6 @@ jobs:
             npm audit fix --audit-level=critical --force
             npm audit fix --audit-level=critical --force
             npm audit --audit-level=critical
-
   deploy-infrastructure:
     docker:
       - image: cimg/base:stable
@@ -177,7 +168,7 @@ jobs:
               --template-file .circleci/files/backend.yml \
               --tags project=udapeople \
               --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
           name: Ensure front-end infrastructure exist
           command: |
@@ -185,8 +176,7 @@ jobs:
               --template-file .circleci/files/frontend.yml \
               --tags project=udapeople \
               --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"  
-              
+              --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
           name: Add back-end ip to ansible inventory
           command: |
@@ -201,8 +191,6 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
-      
-
   configure-infrastructure:
     docker:
       - image: cimg/base:stable
@@ -247,7 +235,6 @@ jobs:
             fi
       - destroy-environment
       - revert-migrations
-
   deploy-frontend:
     docker:
       - image: cimg/base:stable
@@ -256,7 +243,7 @@ jobs:
       - install_awscli
       - install_nodejs
       - restore_cache:
-          keys: [frontend-deps]
+          keys: [frontend-deploy]
       - run:
           name: Install dependencies
           command: |
@@ -271,7 +258,6 @@ jobs:
               --output text)
             echo "API_URL=http://${BACKEND_PUBLIC_IP}:3030" >> frontend/.env
             cat frontend/.env
-
       - run:
           name: Deploy frontend objects
           command: |
@@ -279,8 +265,7 @@ jobs:
             npm run build
             aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
       - destroy-environment
-      - revert-migrations                    
-
+      - revert-migrations
   deploy-backend:
     docker:
       - image: cimg/base:stable
@@ -310,7 +295,7 @@ jobs:
             cat inventory.txt
             ansible-playbook -i inventory.txt deploy-backend.yml
       - destroy-environment
-      - revert-migrations 
+      - revert-migrations
   # smoke-test:
   #   docker:
   #     - image: cimg/base:stable
@@ -331,7 +316,7 @@ jobs:
   #             exit 0
   #           else
   #             exit 1
-  #           fi      
+  #           fi
   #     - run:
   #         name: Frontend smoke test.
   #         command: |
@@ -343,7 +328,7 @@ jobs:
   #             exit 1
   #           fi
   #     - destroy-environment
-  #     - revert-migrations  
+  #     - revert-migrations
   smoke-test:
     docker:
       - image: python:3.7-alpine3.11
@@ -365,7 +350,7 @@ jobs:
               exit 1
             else
               exit 0
-            fi            
+            fi
       - run:
           name: Frontend smoke test.
           command: |
@@ -378,8 +363,6 @@ jobs:
             fi
       - destroy-environment
       - revert-migrations
-
-
   cloudfront-update:
     docker:
       - image: cimg/base:stable
@@ -403,8 +386,7 @@ jobs:
               --parameter-overrides WorkflowID="${CIRCLE_WORKFLOW_ID:0:7}" \
               --stack-name InitialStack
       - destroy-environment
-      - revert-migrations 
-
+      - revert-migrations
   cleanup:
     docker:
       - image: cimg/base:stable
